@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Indikator turbopack Next.js (logo N) di versi terbaru tidak bisa disembunyikan
-  // sepenuhnya via konfigurasi type-safe, kecuali dengan merubah posisi:
-  // devIndicators: { position: "bottom-right" }
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:5000/api/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
