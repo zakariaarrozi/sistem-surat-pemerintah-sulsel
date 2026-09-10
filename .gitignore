@@ -39,3 +39,4 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+backend/test-large.pdf
