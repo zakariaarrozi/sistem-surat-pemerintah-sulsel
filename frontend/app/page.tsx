@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 export default function Home() {
   const [email, setEmail] = useState("");
