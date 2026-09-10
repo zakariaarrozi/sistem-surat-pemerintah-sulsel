@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  OPERATOR
+  USER_INSTANSI
+}
+
+enum AdminType {
+  PIMPINAN
+  KABUPATEN
+  INSTANSI
+}
+
+enum SuratStatus {
+  DRAFT
+  TERKIRIM
+  DIPROSES
+  SELESAI
+  DITOLAK
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(OPERATOR)
+
+  adminType AdminType?
+
+  instansiId Int?
+  instansi   AsalSurat? @relation(fields: [instansiId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  surat Surat[]
+
+  adminTujuan     AdminTujuan[]
+  adminKabupaten  AdminKabupaten[]
+  
+  processedSuratTujuan    SuratTujuan[]    @relation("ProcessedTujuan")
+  processedSuratKabupaten SuratKabupaten[] @relation("ProcessedKabupaten")
+  processedSuratTembusan  SuratTembusan[]  @relation("ProcessedTembusan")
+
+  @@map("users")
+}
+
+model AdminTujuan {
+  id       Int @id @default(autoincrement())
+  adminId  Int
+  tujuanId Int
+
+  admin  User   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tujuan Tujuan @relation(fields: [tujuanId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, tujuanId])
+  @@index([tujuanId])
+  @@map("admin_tujuan")
+}
+
+model AdminKabupaten {
+  id           Int @id @default(autoincrement())
+  adminId      Int
+  kabupatenId  Int
+
+  admin      User       @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  kabupaten  Kabupaten  @relation(fields: [kabupatenId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, kabupatenId])
+  @@index([kabupatenId])
+  @@map("admin_kabupaten")
+}
+
+
+model Surat {
+  id           Int         @id @default(autoincrement())
+  nomorSurat   String
+  tanggalSurat DateTime
+  
+  asalSuratId  Int?
+  asalSurat    AsalSurat? @relation(fields: [asalSuratId], references: [id])
+ 
+  lampiran     Lampiran[]
+  status       SuratStatus @default(DRAFT)
+  keterangan   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  tujuanSurat    SuratTujuan[]
+  tembusanSurat  SuratTembusan[]
+  kabupatenSurat SuratKabupaten[]
+
+  @@index([userId])
+  @@index([tanggalSurat])
+  @@index([status])
+  @@map("surat")
+}
+
+model Lampiran {
+  id        Int      @id @default(autoincrement())
+  suratId   Int
+  fileName  String
+  filePath  String
+  
+  surat     Surat    @relation(fields: [suratId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([suratId])
+  @@map("lampiran")
+}
+
+model AsalSurat {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  surat Surat[]
+  users User[]
+
+  @@map("asal_surat")
+}
+
+model Tujuan {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  suratTujuan   SuratTujuan[]
+  suratTembusan SuratTembusan[]
+
+  adminTujuan AdminTujuan[]
+
+  @@map("tujuan")
+}
+
+model SuratTujuan {
+  id       Int @id @default(autoincrement())
+  suratId  Int
+  tujuanId Int
+
+  status         SuratStatus @default(DRAFT)
+  catatan        String?     @db.Text
+  processedById  Int?
+  updatedAt      DateTime    @default(now()) @updatedAt
+
+  surat         Surat  @relation(fields: [suratId], references: [id], onDelete: Cascade)
+  tujuan        Tujuan @relation(fields: [tujuanId], references: [id], onDelete: Cascade)
+  processedUser User?  @relation("ProcessedTujuan", fields: [processedById], references: [id])
+
+  @@unique([suratId, tujuanId])
+  @@index([tujuanId])
+  @@index([processedById])
+  @@map("surat_tujuan")
+}
+
+model SuratTembusan {
+  id       Int @id @default(autoincrement())
+  suratId  Int
+  tujuanId Int
+
+  status         SuratStatus @default(DRAFT)
+  catatan        String?     @db.Text
+  processedById  Int?
+  updatedAt      DateTime    @default(now()) @updatedAt
+
+  surat         Surat  @relation(fields: [suratId], references: [id], onDelete: Cascade)
+  tujuan        Tujuan @relation(fields: [tujuanId], references: [id], onDelete: Cascade)
+  processedUser User?  @relation("ProcessedTembusan", fields: [processedById], references: [id])
+
+  @@unique([suratId, tujuanId])
+  @@index([tujuanId])
+  @@index([processedById])
+  @@map("surat_tembusan")
+}
+
+model Kabupaten {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  tipe      String
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  suratKabupaten SuratKabupaten[]
+  adminKabupaten AdminKabupaten[]
+  @@map("kabupaten")
+}
+
+model SuratKabupaten {
+  id          Int @id @default(autoincrement())
+  suratId     Int
+  kabupatenId Int
+
+  status         SuratStatus @default(DRAFT)
+  catatan        String?     @db.Text
+  processedById  Int?
+  updatedAt      DateTime    @default(now()) @updatedAt
+
+  surat         Surat     @relation(fields: [suratId], references: [id], onDelete: Cascade)
+  kabupaten     Kabupaten @relation(fields: [kabupatenId], references: [id], onDelete: Cascade)
+  processedUser User?     @relation("ProcessedKabupaten", fields: [processedById], references: [id])
+
+  @@unique([suratId, kabupatenId])
+  @@index([kabupatenId])
+  @@index([processedById])
+  @@map("surat_kabupaten")
+}
