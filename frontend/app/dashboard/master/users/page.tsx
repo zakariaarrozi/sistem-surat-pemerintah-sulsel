@@ -35,7 +35,7 @@ export default function DaftarUserPage() {
         return;
       }
 
-      const res = await fetch(`${BACKEND_URL}/api/users`, {
+      const res = await fetch(`/api/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -58,7 +58,7 @@ export default function DaftarUserPage() {
     try {
       setDeletingId(id);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${BACKEND_URL}/api/users/${id}`, {
+      const res = await fetch(`/api/users/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ export default function DaftarUserPage() {
     try {
       setResettingId(id);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${BACKEND_URL}/api/users/${id}/reset-password`, {
+      const res = await fetch(`/api/users/${id}/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
