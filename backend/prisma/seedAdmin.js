@@ -84,7 +84,7 @@ const admins = [
     email: "admin.instansi5@sulsel.go.id",
     password: "AdminInstansi5!",
     adminType: "INSTANSI",
-    tujuanIds: [40, 41, 42, 43, 44, 45, 48],
+    tujuanIds: [40, 41, 42, 43, 44, 45, 46],
   },
 ];
 
