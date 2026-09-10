@@ -40,3 +40,12 @@ yarn-error.log*
 *.sln
 *.sw?
 backend/test-large.pdf
+
+# AI Assistants / Managers
+.cursor/
+.cursorrules
+.gemini/
+.agents/
+.aider*
+.cline/
+.claude/
